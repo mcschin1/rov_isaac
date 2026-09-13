@@ -1,0 +1,18 @@
+{
+  "outcome": "success",
+  "total_reward": 177.657088462112,
+  "n_steps": 63,
+  "duration_s": 3.15,
+  "final_along_track_m": 5.846744392348023,
+  "pipeline_length_m": 6.132151941772336,
+  "mean_cross_track_m": 1.5197744719897412,
+  "max_cross_track_m": 1.9124161606336603,
+  "mean_heading_alignment": 0.7910964707651887,
+  "min_dist_to_pipe_m": 1.3448424170067526,
+  "required_min_gap_m": 1.0,
+  "gap_requirement_met": true,
+  "max_abs_roll_deg": 13.663612413821589,
+  "max_abs_pitch_deg": 14.847438399357445,
+  "flip_threshold_deg": 75.0,
+  "did_not_flip": true
+}

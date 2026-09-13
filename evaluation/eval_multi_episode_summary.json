@@ -1,0 +1,53 @@
+{
+  "n_episodes": 30,
+  "success_rate": 1.0,
+  "success_rate_95ci": [
+    0.886482908609522,
+    1.0
+  ],
+  "flip_rate": 0.0,
+  "flip_rate_95ci": [
+    -1.2302421700937121e-17,
+    0.11351709139047801
+  ],
+  "pipe_gap_violation_rate": 0.0,
+  "pipe_gap_violation_rate_95ci": [
+    -1.2302421700937121e-17,
+    0.11351709139047801
+  ],
+  "outcomes": [
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success",
+    "success"
+  ],
+  "min_dist_to_pipe_over_all_episodes": 1.3079467928714852,
+  "max_abs_roll_deg_over_all_episodes": 39.03732436646433,
+  "max_abs_pitch_deg_over_all_episodes": 35.48436388518389
+}

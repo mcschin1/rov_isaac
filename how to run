@@ -1,0 +1,3 @@
+cd /home/mcschin1/Downloads/nvidia_rov/rov_pipeline_v5
+export LD_PRELOAD="$LD_PRELOAD:/lib/aarch64-linux-gnu/libgomp.so.1"
+/home/mcschin1/env_isaacsim/bin/python run_policy_isaac_sim_gui_v5.py

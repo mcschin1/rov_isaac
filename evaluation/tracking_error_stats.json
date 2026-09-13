@@ -1,0 +1,9 @@
+{
+  "n_samples": 63,
+  "mean_error_m": 1.5197744719897412,
+  "std_error_m": 0.16045929035357975,
+  "mae_m": 1.5197744719897412,
+  "rmse_m": 1.528221721339044,
+  "max_error_m": 1.9124161606336603,
+  "note": "error = 3D distance from ROV position to nearest point on the pipeline centerline (dist_to_pipe_m), i.e. the standoff-tracking error"
+}
