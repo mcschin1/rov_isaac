@@ -1,0 +1,853 @@
+#usda 1.0
+(
+    customLayerData = {
+        dictionary cameraSettings = {
+            dictionary Front = {
+                double3 position = (5, 0, 0)
+                double radius = 5
+            }
+            dictionary Perspective = {
+                double3 position = (7.620415191970496, 6.194543737541848, 1.0828324402582838)
+                double3 target = (2.2059246252734583, 1.127173164593117, -3.089555023961009)
+            }
+            dictionary Right = {
+                double3 position = (0, -5, 0)
+                double radius = 5
+            }
+            dictionary Top = {
+                double3 position = (0, 0, 5)
+                double radius = 5
+            }
+            string boundCamera = "/OmniverseKit_Persp"
+        }
+        dictionary omni_layer = {
+            string authoring_layer = "./rov_in_water.usda"
+        }
+        dictionary renderSettings = {
+        }
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World"
+{
+    def PhysicsScene "PhysicsScene" (
+        prepend apiSchemas = ["NewtonSceneAPI", "PhysxSceneAPI"]
+    )
+    {
+        vector3f physics:gravityDirection = (0, 0, -1)
+        float physics:gravityMagnitude = 9.81
+    }
+
+    def "Looks"
+    {
+        def Material "Water"
+        {
+            token outputs:surface.connect = </World/Looks/Water/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.05, 0.25, 0.45)
+                float inputs:metallic = 0
+                float inputs:opacity = 0.55
+                float inputs:roughness = 0.05
+                token outputs:surface
+            }
+        }
+
+        def Material "FloatBlue"
+        {
+            token outputs:surface.connect = </World/Looks/FloatBlue/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.55, 0.75, 0.9)
+                float inputs:metallic = 0.1
+                float inputs:opacity = 1
+                float inputs:roughness = 0.55
+                token outputs:surface
+            }
+        }
+
+        def Material "FrameBlack"
+        {
+            token outputs:surface.connect = </World/Looks/FrameBlack/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.04, 0.04, 0.05)
+                float inputs:metallic = 0.4
+                float inputs:opacity = 1
+                float inputs:roughness = 0.5
+                token outputs:surface
+            }
+        }
+
+        def Material "PressureTube"
+        {
+            token outputs:surface.connect = </World/Looks/PressureTube/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.05, 0.05, 0.06)
+                float inputs:metallic = 0.6
+                float inputs:opacity = 1
+                float inputs:roughness = 0.25
+                token outputs:surface
+            }
+        }
+
+        def Material "ThrusterHorizontal"
+        {
+            token outputs:surface.connect = </World/Looks/ThrusterHorizontal/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.08, 0.08, 0.08)
+                float inputs:metallic = 0.6
+                float inputs:opacity = 1
+                float inputs:roughness = 0.3
+                token outputs:surface
+            }
+        }
+
+        def Material "ThrusterVertical"
+        {
+            token outputs:surface.connect = </World/Looks/ThrusterVertical/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.1, 0.1, 0.11)
+                float inputs:metallic = 0.6
+                float inputs:opacity = 1
+                float inputs:roughness = 0.3
+                token outputs:surface
+            }
+        }
+
+        def Material "CameraGlass"
+        {
+            token outputs:surface.connect = </World/Looks/CameraGlass/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.05, 0.08, 0.1)
+                float inputs:metallic = 0.2
+                float inputs:opacity = 0.35
+                float inputs:roughness = 0.05
+                token outputs:surface
+            }
+        }
+
+        def Material "Rock"
+        {
+            token outputs:surface.connect = </World/Looks/Rock/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.32, 0.29, 0.26)
+                float inputs:metallic = 0
+                float inputs:opacity = 1
+                float inputs:roughness = 0.9
+                token outputs:surface
+            }
+        }
+
+        def Material "Seafloor"
+        {
+            token outputs:surface.connect = </World/Looks/Seafloor/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.55, 0.48, 0.35)
+                float inputs:metallic = 0
+                float inputs:opacity = 1
+                float inputs:roughness = 0.95
+                token outputs:surface
+            }
+        }
+
+        def Material "Waypoint"
+        {
+            token outputs:surface.connect = </World/Looks/Waypoint/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.1, 1, 0.3)
+                float inputs:metallic = 0
+                float inputs:opacity = 0.6
+                float inputs:roughness = 0.3
+                token outputs:surface
+            }
+        }
+
+        def Material "Pipeline"
+        {
+            token outputs:surface.connect = </World/Looks/Pipeline/PBRShader.outputs:surface>
+
+            def Shader "PBRShader"
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                color3f inputs:diffuseColor = (0.1, 0.1, 0.11)
+                float inputs:metallic = 0.5
+                float inputs:opacity = 1
+                float inputs:roughness = 0.4
+                token outputs:surface
+            }
+        }
+    }
+
+    def Cube "Water" (
+        active = false
+    )
+    {
+        rel material:binding = </World/Looks/Water>
+        double size = 1
+        float3 xformOp:scale = (40, 40, 0.05)
+        double3 xformOp:translate = (0, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:scale", "xformOp:translate"]
+    }
+
+    def Xform "ROV" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysxRigidBodyAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, 0.02)
+        float3 physics:diagonalInertia = (0.16, 0.16, 0.26)
+        float physics:mass = 11.5
+        quatf physics:principalAxes = (1, 0, 0, 0)
+        custom bool physxRigidBody:disableGravity = 1
+        custom float[] rov:addedMass = [-5.5, -12.7, -14.6, -0.12, -0.12, -0.24]
+        custom float[] rov:allocation:p = [0, 0, 0, 0, -0.11, 0.11]
+        custom float[] rov:allocation:q = [0, 0, 0, 0, -0.12, 0.12]
+        custom float[] rov:allocation:r = [0.15, -0.15, -0.15, 0.15, 0, 0]
+        custom float[] rov:allocation:u = [0.707, 0.707, -0.707, -0.707, 0, 0]
+        custom float[] rov:allocation:v = [0.707, -0.707, 0.707, -0.707, 0, 0]
+        custom float[] rov:allocation:w = [0, 0, 0, 0, 1, 1]
+        custom float rov:buoyancy = 114.8
+        custom vector3f rov:centerOfBuoyancy = (0, 0, 0)
+        custom string[] rov:dofOrder = ["surge", "sway", "heave", "roll", "pitch", "yaw"]
+        custom float[] rov:linearDamping = [-4.03, -6.22, -5.18, -0.07, -0.07, -0.07]
+        custom float[] rov:quadraticDamping = [-18.18, -21.66, -36.99, -1.55, -1.55, -1.55]
+        custom float rov:thrusterMaxForce = 40
+        custom float rov:weight = 112.815
+        double3 xformOp:translate = (0, 0, -3)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cube "Hull" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            double size = 1
+            token visibility = "invisible"
+            float3 xformOp:scale = (1.2, 0.6, 0.35)
+            uniform token[] xformOpOrder = ["xformOp:scale"]
+        }
+
+        def Capsule "FloatPod_0"
+        {
+            uniform token axis = "X"
+            double height = 0.8999999999999999
+            rel material:binding = </World/Looks/FloatBlue>
+            double radius = 0.12
+            double3 xformOp:translate = (0, 0.38, 0.175)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Capsule "FloatPod_1"
+        {
+            uniform token axis = "X"
+            double height = 0.8999999999999999
+            rel material:binding = </World/Looks/FloatBlue>
+            double radius = 0.12
+            double3 xformOp:translate = (0, -0.38, 0.175)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "PressureTube"
+        {
+            uniform token axis = "X"
+            double height = 1.02
+            rel material:binding = </World/Looks/PressureTube>
+            double radius = 0.11
+            double3 xformOp:translate = (0, 0, 0.175)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "FrameRail_0"
+        {
+            uniform token axis = "Y"
+            double height = 0.95
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.025
+            double3 xformOp:translate = (0.65, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "FrameRail_1"
+        {
+            uniform token axis = "Y"
+            double height = 0.95
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.025
+            double3 xformOp:translate = (-0.65, 0, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "SkidRail_0"
+        {
+            uniform token axis = "X"
+            double height = 1.32
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.03
+            double3 xformOp:translate = (0, -0.22, -0.22499999999999998)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "SkidRail_1"
+        {
+            uniform token axis = "X"
+            double height = 1.32
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.03
+            double3 xformOp:translate = (0, 0.22, -0.22499999999999998)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "Thruster_T1"
+        {
+            uniform token axis = "X"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterHorizontal>
+            double radius = 0.045
+            float xformOp:rotateZ = 45
+            double3 xformOp:translate = (0.5499999999999999, -0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "ThrusterDuct_T1"
+        {
+            uniform token axis = "X"
+            double height = 0.108
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.08549999999999999
+            float xformOp:rotateZ = 45
+            double3 xformOp:translate = (0.5499999999999999, -0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "Thruster_T2"
+        {
+            uniform token axis = "X"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterHorizontal>
+            double radius = 0.045
+            float xformOp:rotateZ = -45
+            double3 xformOp:translate = (0.5499999999999999, 0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "ThrusterDuct_T2"
+        {
+            uniform token axis = "X"
+            double height = 0.108
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.08549999999999999
+            float xformOp:rotateZ = -45
+            double3 xformOp:translate = (0.5499999999999999, 0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "Thruster_T3"
+        {
+            uniform token axis = "X"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterHorizontal>
+            double radius = 0.045
+            float xformOp:rotateZ = -45
+            double3 xformOp:translate = (-0.5499999999999999, -0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "ThrusterDuct_T3"
+        {
+            uniform token axis = "X"
+            double height = 0.108
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.08549999999999999
+            float xformOp:rotateZ = -45
+            double3 xformOp:translate = (-0.5499999999999999, -0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "Thruster_T4"
+        {
+            uniform token axis = "X"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterHorizontal>
+            double radius = 0.045
+            float xformOp:rotateZ = 45
+            double3 xformOp:translate = (-0.5499999999999999, 0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "ThrusterDuct_T4"
+        {
+            uniform token axis = "X"
+            double height = 0.108
+            rel material:binding = </World/Looks/FrameBlack>
+            double radius = 0.08549999999999999
+            float xformOp:rotateZ = 45
+            double3 xformOp:translate = (-0.5499999999999999, 0.35, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ"]
+        }
+
+        def Cylinder "Thruster_T5"
+        {
+            uniform token axis = "Z"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterVertical>
+            double radius = 0.045
+            double3 xformOp:translate = (0.3, -0.32, -0.05)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Cylinder "Thruster_T6"
+        {
+            uniform token axis = "Z"
+            double height = 0.18
+            rel material:binding = </World/Looks/ThrusterVertical>
+            double radius = 0.045
+            double3 xformOp:translate = (-0.3, 0.32, -0.05)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "CameraDome"
+        {
+            rel material:binding = </World/Looks/CameraGlass>
+            double radius = 0.11
+            double3 xformOp:translate = (0.51, 0, 0.175)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def Cube "Seafloor" (
+        active = false
+        prepend apiSchemas = ["PhysicsCollisionAPI"]
+    )
+    {
+        rel material:binding = </World/Looks/Seafloor>
+        double size = 1
+        float3 xformOp:scale = (40, 40, 0.1)
+        double3 xformOp:translate = (0, 0, -5)
+        uniform token[] xformOpOrder = ["xformOp:scale", "xformOp:translate"]
+    }
+
+    def Xform "Rocks"
+    {
+        def Sphere "Rock_2" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            rel material:binding = </World/Looks/Rock>
+            double radius = 1
+            custom bool rov:obstacle = 1
+            custom float rov:obstacleRadius = 0.3
+            float xformOp:rotateZ = 100
+            float3 xformOp:scale = (0.3, 0.24, 0.195)
+            double3 xformOp:translate = (0.2, 1.4, -4.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:scale"]
+        }
+
+        def Sphere "Rock_4" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            rel material:binding = </World/Looks/Rock>
+            double radius = 1
+            custom bool rov:obstacle = 1
+            custom float rov:obstacleRadius = 0.4
+            float xformOp:rotateZ = 320
+            float3 xformOp:scale = (0.4, 0.32, 0.26)
+            double3 xformOp:translate = (1.8, -1.2, -4.48)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:scale"]
+        }
+
+        def Sphere "Rock_5" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            rel material:binding = </World/Looks/Rock>
+            double radius = 1
+            custom bool rov:obstacle = 1
+            custom float rov:obstacleRadius = 0.55
+            float xformOp:rotateZ = 250
+            float3 xformOp:scale = (0.55, 0.44, 0.3575)
+            double3 xformOp:translate = (-0.4, -1.8, -4.285)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:scale"]
+        }
+
+    }
+
+    def Xform "Waypoints"
+    {
+        def Sphere "WP_00"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 0
+            double3 xformOp:translate = (0, 0, -3)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_01"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 1
+            double3 xformOp:translate = (1, 1, -4.3)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_02"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 2
+            double3 xformOp:translate = (-0.6, -0.5, -4.3)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_03"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 3
+            double3 xformOp:translate = (0.6, 1.1, -4.2)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_04"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 4
+            double3 xformOp:translate = (-1, 1.3, -4.4)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_05"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 5
+            double3 xformOp:translate = (1.5, -0.8, -4.3)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+
+        def Sphere "WP_06"
+        {
+            rel material:binding = </World/Looks/Waypoint>
+            double radius = 0.08
+            custom int rov:waypointIndex = 6
+            double3 xformOp:translate = (0, 0, -3)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def Xform "Pipeline"
+    {
+        custom bool rov:pipeline = 1
+        custom point3f[] rov:pipelinePoints = [(-3, -0.3, -4.85), (-2, -0.1, -4.85), (-1, 0.15, -4.85), (0, 0, -4.85), (1, -0.2, -4.85), (2, 0.05, -4.85), (3, 0.25, -4.85)]
+
+        def Cylinder "Segment_0" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.019803902718557
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = 11.309933
+            double3 xformOp:translate = (-2.5, -0.2, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+
+        def Cylinder "Segment_1" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.0307764064044151
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = 14.036243
+            double3 xformOp:translate = (-1.5, 0.024999999999999994, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+
+        def Cylinder "Segment_2" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.0111874208078342
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = -8.530766
+            double3 xformOp:translate = (-0.5, 0.075, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+
+        def Cylinder "Segment_3" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.019803902718557
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = -11.309933
+            double3 xformOp:translate = (0.5, -0.1, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+
+        def Cylinder "Segment_4" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.0307764064044151
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = 14.036243
+            double3 xformOp:translate = (1.5, -0.07500000000000001, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+
+        def Cylinder "Segment_5" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token axis = "X"
+            double height = 1.019803902718557
+            rel material:binding = </World/Looks/Pipeline>
+            double radius = 0.08
+            float xformOp:rotateY = -0
+            float xformOp:rotateZ = 11.309933
+            double3 xformOp:translate = (2.5, 0.15, -4.85)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateZ", "xformOp:rotateY"]
+        }
+    }
+
+    def "Lights"
+    {
+        def DomeLight "Dome"
+        {
+            color3f inputs:color = (0.4, 0.55, 0.7)
+            float inputs:intensity = 800
+        }
+
+        def DistantLight "Sun"
+        {
+            float inputs:angle = 1
+            float inputs:intensity = 1500
+            float xformOp:rotateX = -60
+            uniform token[] xformOpOrder = ["xformOp:rotateX"]
+        }
+    }
+}
+
+def "Render" (
+    hide_in_stage_window = true
+    no_delete = true
+)
+{
+    def "OmniverseKit"
+    {
+        def "HydraTextures" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            def RenderProduct "omni_kit_widget_viewport_ViewportTexture_0" (
+                prepend apiSchemas = ["OmniRtxSettingsCommonAdvancedAPI_1", "OmniRtxSettingsRtAdvancedAPI_1", "OmniRtxSettingsPtAdvancedAPI_1", "OmniRtxPostColorGradingAPI_1", "OmniRtxPostChromaticAberrationAPI_1", "OmniRtxPostBloomPhysicalAPI_1", "OmniRtxPostMatteObjectAPI_1", "OmniRtxPostCompositingAPI_1", "OmniRtxPostDofAPI_1", "OmniRtxPostMotionBlurAPI_1", "OmniRtxPostTvNoiseAPI_1", "OmniRtxPostTonemapIrayReinhardAPI_1", "OmniRtxPostDebugSettingsAPI_1", "OmniRtxDebugSettingsAPI_1"]
+                hide_in_stage_window = true
+                no_delete = true
+            )
+            {
+                rel camera = </OmniverseKit_Persp>
+                token omni:rtx:ambientOcclusion:denoiserMode = "none"
+                token omni:rtx:background:source:texture:textureMode = "repeatMirrored"
+                token omni:rtx:background:source:type = "domeLight"
+                bool omni:rtx:debug:view:pixelDebug:enableFixedTextPos = 1
+                token omni:rtx:directLighting:sampledLighting:denoisingTechnique = "None"
+                bool omni:rtx:dlss:frameGeneration = 0
+                float3 omni:rtx:domeLight:rotationAxis = (0, 0, 1)
+                bool omni:rtx:indirectDiffuse:denoiser:enabled = 0
+                bool omni:rtx:material:db:syncLoads = 1
+                token omni:rtx:post:dlss:execMode = "performance"
+                bool omni:rtx:post:registeredCompositing:invertColorCorrection = 1
+                bool omni:rtx:post:registeredCompositing:invertToneMap = 1
+                bool omni:rtx:pt:adaptiveSampling:filterError = 0
+                uint omni:rtx:pt:adaptiveSampling:fixedSppIterations = 2
+                uint omni:rtx:pt:maxSamplesPerLaunch = 2073600
+                uint omni:rtx:pt:mgpu:maxPixelsPerRegionExponent = 12
+                bool omni:rtx:reflections:denoiser:enabled = 0
+                token omni:rtx:rendermode = "RealTimePathTracing"
+                color3f omni:rtx:rt:ambientLight:color = (0.1, 0.1, 0.1)
+                bool omni:rtx:rt:demoire = 0
+                bool omni:rtx:rt:lightcache:spatialCache:dontResolveConflicts = 1
+                int omni:rtx:rt:sss:samples = 1
+                uint omni:rtx:rtpt:maxVolumeBounces = 15
+                float omni:rtx:rtpt:modulatingRoughnessThreshold = 0.08
+                bool omni:rtx:scene:hydra:materialSyncLoads = 1
+                bool omni:rtx:scene:hydra:mdlMaterialWarmup = 1
+                rel orderedVars = </Render/Vars/LdrColor>
+                custom bool overrideClipRange = 0
+                uniform int2 resolution = (1280, 720)
+            }
+        }
+    }
+
+    def RenderSettings "OmniverseGlobalRenderSettings" (
+        prepend apiSchemas = ["OmniRtxSettingsGlobalRtAdvancedAPI_1", "OmniRtxSettingsGlobalPtAdvancedAPI_1"]
+        no_delete = true
+    )
+    {
+        rel products = </Render/OmniverseKit/HydraTextures/omni_kit_widget_viewport_ViewportTexture_0>
+    }
+
+    def "Vars"
+    {
+        def RenderVar "LdrColor" (
+            hide_in_stage_window = true
+            no_delete = true
+        )
+        {
+            uniform string sourceName = "LdrColor"
+            uniform token sourceType = "raw"
+        }
+    }
+}
+
+over "OmniverseKit_Persp" (
+    prepend apiSchemas = ["OmniRtxCameraAutoExposureAPI_1", "OmniRtxCameraExposureAPI_1"]
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (0.01, 10000000)
+    float exposure:fStop = 5
+    float exposure:responsivity = 1.1026709
+    float exposure:time = 0.02
+    float focalLength = 18.147562
+    float focusDistance = 400
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 5.454189108867916e-17, -8.50904047305054)
+    float3 xformOp:rotateXYZ = (60.63657, -5.9836894e-14, 133.10327)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (7.620415191970496, 6.194543737541848, 1.0828324402582838)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Front" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.2722219e-14, 90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (5, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Right" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (90, -1.2833635e-30, 1.2722219e-14)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, -5, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
+over "OmniverseKit_Top" (
+    customData = {
+        dictionary omni = {
+            dictionary kit = {
+                bool hide_in_stage_window = 1
+                bool no_delete = 1
+            }
+        }
+    }
+    hide_in_stage_window = true
+    kind = "component"
+    no_delete = true
+)
+{
+    float2 clippingRange = (1, 10000000)
+    float horizontalAperture = 50
+    custom uniform vector3d omni:kit:centerOfInterest = (0, 0, -5)
+    token projection = "orthographic"
+    float verticalAperture = 50
+    float3 xformOp:rotateXYZ = (-1.2722219e-14, -7.016709e-15, -90)
+    float3 xformOp:scale = (1, 1, 1)
+    double3 xformOp:translate = (0, 0, 5)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ", "xformOp:scale"]
+}
+
