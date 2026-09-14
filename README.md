@@ -277,29 +277,7 @@ These details should be maintained in the project's internal documentation rathe
 
 ---
 
-## 11. Protected Implementation Components
-
-The following components are intentionally excluded from this public documentation:
-
-* ROV USD assets
-* Calibrated hydrodynamic parameters
-* PINN architecture and weights
-* PPO network architecture
-* PPO hyperparameters
-* Reward coefficients
-* Thruster allocation details
-* Proprietary Python modules
-* Internal APIs and interfaces
-* Training checkpoints
-* Dataset details
-* Calibration procedures
-* Simulation-specific tuning parameters
-
-These components constitute the implementation details required to reproduce the complete digital twin.
-
----
-
-## 12. Research Objective
+## 11. Research Objective
 
 The overall objective is to establish a GPU-accelerated digital twin framework for investigating:
 
