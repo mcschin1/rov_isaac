@@ -255,29 +255,7 @@ The recommended development sequence is:
 
 ---
 
-## 10. Reproducibility
-
-For research experiments, the following information should be recorded internally:
-
-```text
-Hardware configuration
-Software versions
-Container version
-Vehicle parameters
-Hydrodynamic parameters
-PINN configuration
-PPO configuration
-Simulation timestep
-Training configuration
-Random seed
-Evaluation conditions
-```
-
-These details should be maintained in the project's internal documentation rather than exposed in the public README.
-
----
-
-## 11. Research Objective
+## 10. Research Objective
 
 The overall objective is to establish a GPU-accelerated digital twin framework for investigating:
 
