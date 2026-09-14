@@ -1,683 +1,316 @@
 # Using Isaac Sim for the ROV Reinforcement Learning Digital Twin
 
-This guide describes how to integrate **NVIDIA Isaac Sim** into an existing **ROV reinforcement learning (RL) digital twin**, combining a **6-DOF Fossen hydrodynamic model**, **physics-informed neural network (PINN)** components, and a **PPO reinforcement learning agent**. The workflow is intended for deployment and experimentation on an **NVIDIA DGX Spark with ARM64/Grace architecture**.
+This project explores the integration of **NVIDIA Isaac Sim** with an existing **ROV reinforcement learning (RL) digital twin**. The framework combines marine vehicle dynamics, physics-informed learning and reinforcement learning to investigate autonomous ROV control and pipeline-tracking applications.
 
-## 1. Project Overview
+The implementation is designed for GPU-accelerated simulation and training on NVIDIA hardware.
 
-The objective is to create a simulation and reinforcement learning pipeline in which the ROV digital twin provides a physically meaningful environment for training and evaluating autonomous control policies.
+> **Note:** This README provides an overview of the workflow and environment setup. Certain implementation details, model parameters, training configurations, simulation assets and integration interfaces have been intentionally omitted.
 
-The overall workflow is:
+---
+
+## 1. System Overview
+
+The digital twin combines several components:
 
 ```text
-Fossen Hydrodynamic Model
-          │
-          ▼
-   PINN-Based Physics
-          │
-          ▼
-     ROV Digital Twin
-          │
-          ▼
-      NVIDIA Isaac Sim
-          │
-          ▼
-   RL Environment / API
-          │
-          ▼
-       PPO Agent
-          │
-          ▼
-   Trained ROV Policy
-          │
-          ▼
- Isaac Sim Validation
+        ROV Hydrodynamic Model
+                 │
+                 ▼
+        Physics-Informed Model
+                 │
+                 ▼
+          ROV Digital Twin
+                 │
+                 ▼
+           NVIDIA Isaac Sim
+                 │
+                 ▼
+          RL Environment
+                 │
+                 ▼
+             PPO Agent
+                 │
+                 ▼
+       Autonomous ROV Control
 ```
 
-The existing Fossen model provides the underlying marine dynamics, while Isaac Sim provides the simulation environment, physics, sensors, visualization, and deployment framework for the RL workflow.
+Isaac Sim provides the simulation environment, while the existing marine dynamics and learning components provide the basis for ROV behaviour and control.
 
 ---
 
-# 2. Hardware and Software Environment
+## 2. Hardware and Software
 
-The recommended development platform is:
+The development workflow uses:
 
-* **Hardware:** NVIDIA DGX Spark
-* **Architecture:** ARM64 / NVIDIA Grace
-* **GPU:** NVIDIA Blackwell-class GPU
-* **Simulation:** NVIDIA Isaac Sim
-* **RL Algorithm:** Proximal Policy Optimization (PPO)
-* **ROV Dynamics:** 6-DOF Fossen model
-* **Physics Learning:** PINN-based modelling
-* **Container Runtime:** Docker
-* **GPU Runtime:** NVIDIA Container Toolkit
-* **Asset Format:** USD
-* **Programming:** Python
+* NVIDIA GPU computing platform
+* ARM64/Grace-based computing environment
+* NVIDIA Isaac Sim
+* Docker-based deployment
+* Python
+* PPO reinforcement learning
+* 6-DOF marine vehicle dynamics
+* Physics-informed neural networks (PINNs)
+* USD-based simulation assets
 
-The project directory can be organised as:
-
-```text
-~/rov-isaac/
-│
-├── assets/
-│   ├── rov/
-│   ├── environment/
-│   └── sensors/
-│
-├── usd/
-│   ├── rov.usd
-│   └── underwater_scene.usd
-│
-├── models/
-│   ├── fossen/
-│   ├── pinn/
-│   └── ppo/
-│
-├── scripts/
-│   ├── environment/
-│   ├── dynamics/
-│   ├── training/
-│   └── evaluation/
-│
-├── checkpoints/
-│
-├── logs/
-│
-└── README.md
-```
+Specific hardware configurations, software versions and dependency combinations are intentionally not disclosed in this public README.
 
 ---
 
-# 3. Environment Setup on DGX Spark
+## 3. Isaac Sim Environment
 
-Isaac Sim releases and container availability can differ between **x86_64** and **ARM64/Grace** platforms. Therefore, the DGX Spark should be configured using the appropriate NVIDIA-supported ARM64 container rather than assuming that the standard x86_64 installation will work.
+Isaac Sim is deployed using an NVIDIA-supported container appropriate for the target GPU architecture.
 
-Before starting, verify:
-
-1. NVIDIA GPU driver
-2. Docker
-3. NVIDIA Container Toolkit
-4. ARM64-compatible Isaac Sim container
-5. GPU passthrough
-6. Headless rendering
-
-Check the architecture:
+A generic container workflow is:
 
 ```bash
-uname -m
+docker pull nvcr.io/nvidia/isaac-sim:<VERSION>-<ARCH>
 ```
 
-The expected result is:
-
-```text
-aarch64
-```
-
-Check the NVIDIA driver:
-
-```bash
-nvidia-smi
-```
-
-Check Docker:
-
-```bash
-docker --version
-```
-
-Check that Docker can access the GPU:
-
-```bash
-docker run --rm --gpus all nvidia/cuda:12.8.1-base-ubuntu24.04 nvidia-smi
-```
-
-The CUDA image tag should be adjusted if your installed driver requires a different compatible CUDA version.
-
----
-
-# 4. Obtain the Isaac Sim Container
-
-Isaac Sim is distributed by NVIDIA through the **NVIDIA NGC container registry**.
-
-For an ARM64/Grace system, use the appropriate **aarch64** image tag provided by NVIDIA.
-
-For example:
-
-```bash
-docker pull nvcr.io/nvidia/isaac-sim:<tag>-aarch64
-```
-
-Replace `<tag>` with the Isaac Sim version required for the project.
-
-For example, if using a specific supported release:
-
-```bash
-docker pull nvcr.io/nvidia/isaac-sim:<ISAAC_SIM_VERSION>-aarch64
-```
-
-> **Important:** Do not assume that an x86_64 Isaac Sim container will run correctly on DGX Spark. Confirm that the selected release explicitly supports the ARM64/Grace platform.
-
----
-
-# 5. Create the ROV Isaac Sim Workspace
-
-Create a dedicated project directory:
-
-```bash
-mkdir -p ~/rov-isaac
-```
-
-Create the main subdirectories:
-
-```bash
-mkdir -p ~/rov-isaac/{assets,usd,models,scripts,checkpoints,logs}
-```
-
-The directory can then be mounted into the Isaac Sim container.
-
----
-
-# 6. Launch Isaac Sim
-
-Launch the container with GPU access and mount the ROV project directory:
+The container is then launched with GPU access and a project workspace:
 
 ```bash
 docker run --gpus all -it --rm \
-    -v ~/rov-isaac:/workspace \
-    nvcr.io/nvidia/isaac-sim:<tag>-aarch64
+    -v <PROJECT_DIRECTORY>:/workspace \
+    nvcr.io/nvidia/isaac-sim:<VERSION>-<ARCH>
 ```
 
-Inside the container, verify the mounted directory:
-
-```bash
-ls -la /workspace
-```
-
-You should see:
-
-```text
-assets
-usd
-models
-scripts
-checkpoints
-logs
-```
+The exact image version, architecture tag and project directory used in the implementation are intentionally omitted.
 
 ---
 
-# 7. Verify Isaac Sim
+## 4. Initial Verification
 
-Before developing the ROV digital twin, verify that Isaac Sim itself can start successfully.
+Before integrating the ROV digital twin, Isaac Sim should be verified independently.
 
-For a headless DGX Spark training environment:
+For a headless environment, the corresponding Isaac Sim headless launcher can be used:
 
 ```bash
 ./isaac-sim.headless.sh
 ```
 
-If the installation uses a different launcher or installation layout, use the corresponding Isaac Sim executable supplied by the container.
-
-The first objective is simply to confirm:
+The initial verification should confirm:
 
 ```text
-GPU detected
-       ↓
-Isaac Sim starts
-       ↓
-Renderer initialises
-       ↓
-Headless mode works
+GPU
+ │
+ ▼
+Container
+ │
+ ▼
+Isaac Sim
+ │
+ ▼
+Headless Rendering
+ │
+ ▼
+Simulation
 ```
 
-Do this **before** adding the ROV model, Fossen dynamics, PINN or PPO components.
+Only after this stage has been successfully completed should the ROV environment be introduced.
 
 ---
 
-# 8. ROV Digital Twin Architecture
+## 5. ROV Digital Twin
 
-The proposed digital twin consists of several interacting layers:
+The ROV digital twin incorporates a six-degree-of-freedom marine vehicle representation.
+
+The general state consists of position, orientation, linear velocity and angular velocity:
 
 ```text
-                 ┌──────────────────────┐
-                 │     PPO Agent        │
-                 │ Policy / Value Net    │
-                 └──────────┬───────────┘
-                            │
-                       Actions
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │   ROV Controller     │
-                 │ Thruster Allocation  │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │   Isaac Sim ROV      │
-                 │  USD + Physics       │
-                 │ Sensors + Environment│
-                 └──────────┬───────────┘
-                            │
-                       State Data
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │ Fossen 6-DOF Model   │
-                 │ Hydrodynamics        │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │ PINN / Physics Model │
-                 │ Parameter Estimation │
-                 └──────────┬───────────┘
-                            │
-                            ▼
-                 ┌──────────────────────┐
-                 │ Observation / Reward │
-                 │      Function        │
-                 └──────────┬───────────┘
-                            │
-                            └──────► PPO
+ROV State
+   │
+   ├── Position
+   ├── Orientation
+   ├── Linear Velocity
+   └── Angular Velocity
 ```
+
+The underlying hydrodynamic formulation follows established marine vehicle modelling approaches.
+
+Specific hydrodynamic coefficients, vehicle dimensions, mass properties, damping parameters and other calibrated model parameters are not included.
 
 ---
 
-# 9. ROV Model Integration
+## 6. Physics-Informed Learning
 
-The ROV should be represented in Isaac Sim using a USD-based asset.
+A physics-informed neural network is incorporated to represent selected aspects of the ROV's uncertain or nonlinear behaviour.
 
-Recommended components include:
-
-* ROV body
-* Six-degree-of-freedom rigid-body model
-* Thrusters
-* Thruster forces
-* IMU
-* Depth sensor
-* Camera
-* Sonar or simulated range sensor
-* Navigation state
-* Pipeline/environment geometry
-
-The ROV state can be represented as:
+The general concept is:
 
 ```text
-η = [x, y, z, φ, θ, ψ]
-
-ν = [u, v, w, p, q, r]
-```
-
-where:
-
-* `x, y, z` = position
-* `φ, θ, ψ` = roll, pitch and yaw
-* `u, v, w` = linear velocities
-* `p, q, r` = angular velocities
-
-Together:
-
-```text
-x_ROV = [η, ν]
-```
-
----
-
-# 10. Fossen Hydrodynamic Model
-
-The Fossen model provides the marine vehicle dynamics used by the digital twin.
-
-A general 6-DOF representation is:
-
-```text
-Mν̇ + C(ν)ν + D(ν)ν + g(η) = τ + τdist
-```
-
-where:
-
-* `M` = rigid-body and added-mass matrix
-* `C(ν)` = Coriolis and centripetal matrix
-* `D(ν)` = hydrodynamic damping
-* `g(η)` = restoring forces and moments
-* `τ` = control input
-* `τdist` = environmental disturbances
-
-The model can be used as a reference physics model while Isaac Sim handles the simulated environment and sensor interface.
-
----
-
-# 11. PINN-Based Physics Model
-
-The PINN component can be used to learn or refine uncertain hydrodynamic parameters.
-
-Potential applications include:
-
-* Hydrodynamic coefficient estimation
-* Added-mass estimation
-* Drag estimation
-* Disturbance modelling
-* Model correction
-* Sim-to-real adaptation
-
-A conceptual structure is:
-
-```text
-Experimental / Simulated Data
+Simulation / Experimental Data
              │
              ▼
        Neural Network
              │
              ▼
-   Physics-Based Loss
-             │
-             ├── Data Loss
-             ├── Dynamics Loss
-             └── Boundary / Constraint Loss
+      Physics Constraints
              │
              ▼
-      PINN Parameters
+     Physics-Informed Model
 ```
 
-The PINN should complement the Fossen model rather than completely replacing the established dynamics model unless that is specifically required by the experiment.
+The PINN can support applications such as:
+
+* Hydrodynamic parameter estimation
+* Model correction
+* Uncertainty representation
+* Disturbance modelling
+* Adaptive simulation
+
+The network architecture, training parameters, loss-function formulation and calibrated parameters are implementation-specific and are therefore omitted.
 
 ---
 
-# 12. PPO Reinforcement Learning
+## 7. Reinforcement Learning
 
-The PPO agent receives observations from the ROV environment and produces control actions.
+The RL component uses PPO to learn an ROV control policy.
 
-Example observation vector:
-
-```text
-o_t =
-[
-    position,
-    orientation,
-    linear_velocity,
-    angular_velocity,
-    tracking_error,
-    heading_error,
-    depth_error
-]
-```
-
-The action vector may represent desired thruster commands:
+The general training loop is:
 
 ```text
-a_t =
-[
-    T1,
-    T2,
-    T3,
-    T4,
-    T5,
-    T6
-]
+ROV Observation
+       │
+       ▼
+    PPO Policy
+       │
+       ▼
+ Control Action
+       │
+       ▼
+   Isaac Sim
+       │
+       ▼
+   New State
+       │
+       ▼
+    Reward
+       │
+       └──────────► PPO Update
 ```
 
-The exact number of thrusters should match the physical ROV configuration.
+The policy is trained to achieve the required ROV control objective while maintaining stable and physically meaningful behaviour.
 
-A typical training loop is:
-
-```text
-Reset Environment
-       │
-       ▼
-Obtain ROV Observation
-       │
-       ▼
-PPO Policy
-       │
-       ▼
-Thruster Commands
-       │
-       ▼
-Isaac Sim
-       │
-       ▼
-ROV State Update
-       │
-       ▼
-Calculate Reward
-       │
-       ▼
-Next Observation
-       │
-       └──────────────► PPO Update
-```
+Exact observation definitions, action mappings, network architecture, PPO hyperparameters and reward coefficients are not disclosed.
 
 ---
 
-# 13. Pipeline-Tracking Task
+## 8. Pipeline-Tracking Application
 
-For a pipeline-tracking experiment, the environment should contain:
+One application considered by the digital twin is autonomous underwater pipeline tracking.
 
-* Underwater terrain
-* Pipeline geometry
-* ROV
-* Navigation reference
-* Disturbance model
-* Sensors
-* Tracking reward
-
-A simplified tracking error can be defined as:
+The general objective is:
 
 ```text
-e = p_ROV - p_reference
+Reference Pipeline
+        │
+        ▼
+Tracking Error
+        │
+        ▼
+   PPO Controller
+        │
+        ▼
+    ROV Motion
+        │
+        ▼
+Tracking Performance
 ```
 
-The reward can combine several objectives:
+The simulation can incorporate environmental disturbances and sensor uncertainty to evaluate the robustness of the learned controller.
 
-```text
-R =
--w1 ||e_position||
--w2 ||e_heading||
--w3 ||e_velocity||
--w4 ||u||
-```
-
-where the weights should be selected experimentally.
-
-The objective is to minimise tracking error while avoiding excessive control effort and unstable manoeuvres.
+The precise pipeline geometry, sensor configuration, tracking thresholds and reward formulation are implementation-specific.
 
 ---
 
-# 14. Training and Evaluation
+## 9. Development Workflow
 
-Training should initially be performed in a simplified environment.
-
-### Stage 1: Controller verification
+The recommended development sequence is:
 
 ```text
-ROV
- ↓
-Fossen model
- ↓
-Basic controller
- ↓
-Tracking test
-```
-
-### Stage 2: Isaac Sim integration
-
-```text
-ROV USD
- ↓
-Isaac Sim
- ↓
-Sensors
- ↓
-Fossen dynamics
-```
-
-### Stage 3: PPO training
-
-```text
-Isaac Sim
- ↓
-RL Environment
- ↓
-PPO
- ↓
-Policy
-```
-
-### Stage 4: Disturbance training
-
-Introduce:
-
-* Ocean currents
-* Sensor noise
-* Parameter uncertainty
-* Thruster uncertainty
-* External disturbances
-
-### Stage 5: Validation
-
-Evaluate the trained policy under conditions that were **not used during training**.
-
----
-
-# 15. Recommended Project Workflow
-
-The complete workflow is:
-
-```text
-1. Configure DGX Spark
+1. Configure GPU environment
           ↓
-2. Verify NVIDIA driver
+2. Verify container GPU access
           ↓
-3. Verify Docker + GPU passthrough
+3. Start Isaac Sim
           ↓
-4. Pull ARM64 Isaac Sim container
+4. Verify headless simulation
           ↓
-5. Verify headless Isaac Sim
+5. Import ROV simulation asset
           ↓
-6. Import ROV USD model
+6. Configure sensors
           ↓
-7. Configure sensors
+7. Connect vehicle dynamics
           ↓
-8. Integrate Fossen dynamics
+8. Integrate physics-informed model
           ↓
-9. Add PINN model
+9. Create RL environment
           ↓
-10. Create RL environment
+10. Configure PPO training
           ↓
-11. Implement reward function
+11. Train controller
           ↓
-12. Connect PPO agent
-          ↓
-13. Train policy
-          ↓
-14. Evaluate tracking performance
-          ↓
-15. Test robustness
-          ↓
-16. Validate digital twin
+12. Evaluate ROV performance
 ```
 
 ---
 
-# 16. Troubleshooting
+## 10. Reproducibility
 
-### Check GPU visibility
-
-```bash
-nvidia-smi
-```
-
-If the GPU is not visible inside the container, check the NVIDIA Container Toolkit and Docker GPU runtime configuration.
-
-### Check container architecture
-
-```bash
-uname -m
-```
-
-Expected on DGX Spark:
+For research experiments, the following information should be recorded internally:
 
 ```text
-aarch64
+Hardware configuration
+Software versions
+Container version
+Vehicle parameters
+Hydrodynamic parameters
+PINN configuration
+PPO configuration
+Simulation timestep
+Training configuration
+Random seed
+Evaluation conditions
 ```
 
-### Check mounted workspace
-
-```bash
-ls -la /workspace
-```
-
-### Test Isaac Sim headless mode
-
-```bash
-./isaac-sim.headless.sh
-```
-
-If headless startup fails, resolve the Isaac Sim/container/driver issue before attempting to run the RL training pipeline.
-
-### Check Python environment
-
-```bash
-python --version
-```
-
-and:
-
-```bash
-python -c "import torch; print(torch.__version__)"
-```
+These details should be maintained in the project's internal documentation rather than exposed in the public README.
 
 ---
 
-# 17. Reproducibility
+## 11. Protected Implementation Components
 
-Record the following information for every experiment:
+The following components are intentionally excluded from this public documentation:
 
-```text
-Isaac Sim version:
-Container image:
-DGX Spark configuration:
-NVIDIA driver:
-CUDA version:
-Python version:
-PyTorch version:
-RL framework:
-PPO configuration:
-Fossen model parameters:
-PINN configuration:
-ROV configuration:
-Simulation timestep:
-Training timestep:
-Random seed:
-Number of training episodes:
-```
+* ROV USD assets
+* Calibrated hydrodynamic parameters
+* PINN architecture and weights
+* PPO network architecture
+* PPO hyperparameters
+* Reward coefficients
+* Thruster allocation details
+* Proprietary Python modules
+* Internal APIs and interfaces
+* Training checkpoints
+* Dataset details
+* Calibration procedures
+* Simulation-specific tuning parameters
 
-This information is particularly important when comparing different PPO policies or transferring policies between simulation configurations.
+These components constitute the implementation details required to reproduce the complete digital twin.
 
 ---
 
-# 18. Final Objective
+## 12. Research Objective
 
-The final system should provide a unified **ROV reinforcement learning digital twin** in which:
+The overall objective is to establish a GPU-accelerated digital twin framework for investigating:
 
-```text
-        Fossen Model
-             +
-        PINN Physics
-             +
-        Isaac Sim
-             +
-       ROV Sensors
-             +
-          PPO RL
-             │
-             ▼
-   Autonomous ROV Controller
-             │
-             ▼
-     Pipeline Tracking
-             │
-             ▼
-   Robustness / Validation
-```
+* Autonomous ROV control
+* Reinforcement learning
+* Physics-informed learning
+* Pipeline tracking
+* Robust control under uncertainty
+* Sim-to-real transfer
+* Intelligent subsea robotics
 
-The DGX Spark provides the computational platform for running the simulation, neural-network training and evaluation workflow. The resulting environment can then serve as a foundation for further work on **sim-to-real transfer, autonomous underwater navigation, adaptive control, and agentic AI for subsea robotics**.
+The public version of this repository provides the **conceptual workflow and environment setup**, while the complete implementation remains restricted to the appropriate research and development environment.
+
+This version gives readers enough information to understand **what you have built and how the components interact**, while making it substantially harder to reproduce the complete system without your internal code, parameters and assets.
