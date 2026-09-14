@@ -1,4 +1,4 @@
-# README: Using Isaac Sim for the ROV Reinforcement Learning Digital Twin
+# Using Isaac Sim for the ROV Reinforcement Learning Digital Twin
 
 This guide describes how to integrate **NVIDIA Isaac Sim** into an existing **ROV reinforcement learning (RL) digital twin**, combining a **6-DOF Fossen hydrodynamic model**, **physics-informed neural network (PINN)** components, and a **PPO reinforcement learning agent**. The workflow is intended for deployment and experimentation on an **NVIDIA DGX Spark with ARM64/Grace architecture**.
 
